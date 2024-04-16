@@ -149,7 +149,11 @@ class GPT3(LM):
 
     def _get_choice_text(self, choice: dict[str, Any]) -> str:
         if self.model_type == "chat":
-            return choice["message"]["content"]
+            message = choice["message"]
+            if content := message['content']:
+                return content
+            elif tool_calls := message.get('tool_calls', None):
+                return json.dumps([tool['function']['arguments'] for tool in tool_calls])
         return choice["text"]
 
     def __call__(
